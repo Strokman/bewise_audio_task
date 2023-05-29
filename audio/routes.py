@@ -1,5 +1,5 @@
 from audio import app, db
-from flask import request
+from flask import request, redirect
 from .models import User, AudioFile
 from pydub import AudioSegment
 from uuid import uuid4
@@ -24,11 +24,13 @@ def file():
     user_uuid = request.form['uuid']
     user_token = request.form['token']
     if user_token == db.session.execute(db.select(User.token).filter_by(token=user_token)).scalar() and user_uuid == db.session.execute(db.select(User.uuid).filter_by(uuid=user_uuid)).scalar():
-        audio_file = AudioFile(wav_file.filename, wav_file.read(), uuid4().__str__(), user_uuid)
+        file_uuid = uuid4().__str__()
+        audio_file = AudioFile(wav_file.filename, wav_file.read(), file_uuid, user_uuid)
         db.session.add(audio_file)
         db.session.flush()
         db.session.commit()
-        return 'OK', 200
+        return f'Please save the download link for your file - ' \
+               f'http://localhost:5000/record?id={file_uuid}&user={user_uuid}', 200
     else:
         return 'User not found', 404
     # audio_file = AudioFile(wav_file.filename, wav_file.read(), 'as111dawqddd', 'asdasasd23123dqwqdcqs')
@@ -46,3 +48,10 @@ def file():
 
     # print(audio)
     return 'ok'
+
+
+@app.route('/record', methods=['GET'])
+def record():
+    file_uuid = request.args['id']
+    user_uuid = request.args['user']
+    return ''
