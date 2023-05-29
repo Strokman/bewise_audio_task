@@ -1,7 +1,7 @@
 from audio import db
-from datetime import datetime
 from uuid import uuid4
 from random import randint
+from pydub import AudioSegment
 
 
 class User(db.Model):
@@ -36,5 +36,13 @@ class AudioFile(db.Model):
     __tablename__ = 'audio_files'
 
     id: int = db.Column(db.Integer(), nullable=False, primary_key=True)
-    token: str = db.Column(db.String(36), nullable=False)
-    user_id: int = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    filename: str = db.Column(db.String(100), nullable=False)
+    file = db.Column(db.LargeBinary, nullable=False)
+    file_uuid: str = db.Column(db.String(36), nullable=False)
+    user_uuid: str = db.Column(db.String(50), db.ForeignKey('users.uuid'), nullable=False)
+
+    def __init__(self, filename, file, file_uuid, user_uuid):
+        self.filename = filename
+        self.file = file
+        self.file_uuid = file_uuid
+        self.user_uuid = user_uuid
