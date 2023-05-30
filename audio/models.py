@@ -21,9 +21,9 @@ class User(db.Model):
         uuid = ''
         for i in range(len(self.username)):
             if i % 2 == 0:
-                uuid += str(randint(1, 9))
+                uuid += chr(randint(65, 90))
             else:
-                uuid += chr(randint(65, 122))
+                uuid += chr(randint(97, 122))
         return self.username + '-' + uuid
 
     @classmethod

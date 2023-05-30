@@ -32,8 +32,8 @@ def file():
         user_token = request.form['token']
         if User.get_user(uuid=user_uuid, token=user_token):
             filename = secure_filename(wav_file.filename)
-            file_ext = os.path.splitext(filename)[1]
-            if filename != '' and file_ext in app.config['ALLOWED_EXTENSIONS']:
+            file_ext: str = os.path.splitext(filename)[1]
+            if filename != '' and file_ext.lower() in app.config['ALLOWED_EXTENSIONS']:
                 audio_file = AudioFile(filename, wav_file.read(), user_uuid)
                 db.session.add(audio_file)
                 db.session.flush()
@@ -50,6 +50,7 @@ def file():
 
 @app.route('/record', methods=['GET'])
 def record():
+    err_msg = 'Please provide correct file unique identifier and access token\n'
     try:
         path = f'{current_app.root_path}/{app.config["UPLOAD_FOLDER"]}/'
         file_uuid = request.args['id']
@@ -71,8 +72,6 @@ def record():
             os.remove(tmp_file)
             return send_file(return_data, mimetype='audio/mpeg', download_name=filename, as_attachment=True)
         else:
-            return 'Please provide correct file unique identifier and access token\n', 400
+            return err_msg, 400
     except KeyError:
-        return 'Please provide correct link\n', 400
-
-
+        return err_msg, 400
