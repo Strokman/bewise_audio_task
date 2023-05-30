@@ -1,11 +1,11 @@
 import flask
 import io
 import os
+import subprocess
 
 from audio import app, db
 from .models import User, AudioFile
 from flask import request, send_file, current_app
-from pydub import AudioSegment
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 
@@ -60,16 +60,16 @@ def record():
         wav_file: AudioFile = AudioFile.get_file(file_uuid, user_uuid)
         if wav_file:
             filename = os.path.splitext(wav_file.filename)[0] + '.mp3'
-            tmp_file = f'{path}/tmp.wav'
+            tmp_file = f'{path}tmp.wav'
             with open(tmp_file, 'wb') as f:
                 f.write(wav_file.file)
-            mp3_file = AudioSegment.from_file(tmp_file, format='wav')
-            mp3_file.export(f'{path}/{filename}', format='mp3')
+            cmd = f'lame --preset insane {tmp_file} {path}{filename}'
+            subprocess.call(cmd, shell=True)
             return_data = io.BytesIO()
-            with open(f'{path}/{filename}', 'rb') as fo:
+            with open(f'{path}{filename}', 'rb') as fo:
                 return_data.write(fo.read())
             return_data.seek(0)
-            os.remove(f'{path}/{filename}')
+            os.remove(f'{path}{filename}')
             os.remove(tmp_file)
             return send_file(return_data, mimetype='audio/mpeg', download_name=filename, as_attachment=True)
         else:
