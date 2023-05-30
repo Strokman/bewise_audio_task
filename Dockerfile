@@ -1,6 +1,6 @@
 FROM python:3.11.3-slim-buster
 
-RUN apt install ffmpeg
+RUN apt-get -y update && apt-get install -y ffmpeg
 # switch working directory
 WORKDIR /app
 
