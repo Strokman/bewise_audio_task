@@ -43,7 +43,7 @@ class AudioFile(db.Model):
     filename: str = db.Column(db.String(100), nullable=False)
     file = db.Column(db.LargeBinary, nullable=False)
     file_uuid: str = db.Column(db.String(36), nullable=False, unique=True)
-    user_uuid: str = db.Column(db.String(50), db.ForeignKey('users.uuid'), nullable=False)
+    user_uuid: int = db.Column(db.String(100), db.ForeignKey('users.uuid'), nullable=False)
 
     def __init__(self, filename, file, user_uuid):
         self.filename = filename
