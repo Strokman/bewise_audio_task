@@ -1,6 +1,6 @@
 from audio import db
-from uuid import uuid4
 from random import randint
+from uuid import uuid4
 
 
 class User(db.Model):

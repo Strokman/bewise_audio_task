@@ -1,11 +1,13 @@
+import flask
+import io
+import os
+
 from audio import app, db
-from flask import request, send_file, current_app
-from werkzeug.utils import secure_filename
 from .models import User, AudioFile
+from flask import request, send_file, current_app
 from pydub import AudioSegment
 from sqlalchemy.exc import IntegrityError
-import os
-import io
+from werkzeug.utils import secure_filename
 
 
 @app.route('/register', methods=['POST'])
@@ -39,7 +41,7 @@ def file():
                 db.session.flush()
                 db.session.commit()
                 return f'Please save the download link for your file - ' \
-                       f'http://localhost:5000/record?id={audio_file.file_uuid}&user={audio_file.user_uuid}\n', 200
+                       f'{flask.request.host_url}record?id={audio_file.file_uuid}&user={audio_file.user_uuid}\n', 200
             else:
                 return 'Please submit correct file\n', 400
         else:
@@ -66,7 +68,6 @@ def record():
             return_data = io.BytesIO()
             with open(f'{path}/{filename}', 'rb') as fo:
                 return_data.write(fo.read())
-            # (after writing, cursor will be at last byte, so move it to start)
             return_data.seek(0)
             os.remove(f'{path}/{filename}')
             os.remove(tmp_file)
