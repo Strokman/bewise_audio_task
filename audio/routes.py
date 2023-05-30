@@ -1,57 +1,78 @@
 from audio import app, db
-from flask import request, redirect
+from flask import request, send_file, current_app
+from werkzeug.utils import secure_filename
 from .models import User, AudioFile
 from pydub import AudioSegment
-from uuid import uuid4
+from sqlalchemy.exc import IntegrityError
+import os
+import io
 
 
 @app.route('/register', methods=['POST'])
 def register():
-    username: str = request.json.get('username')
-    if User.check_user_exists(username):
-        return 'User exists', 409
+    username: str = request.form['username']
+    if username != '':
+        try:
+            user = User(username)
+            db.session.add(user)
+            db.session.flush()
+            db.session.commit()
+            return f'Please save your register information: {user.uuid=}, {user.token=}\n', 200
+        except IntegrityError:
+            return 'User exists\n', 409
     else:
-        user = User(username)
-        db.session.add(user)
-        db.session.flush()
-        db.session.commit()
-        return f'Please save your register information: {user.uuid=}, {user.token=}', 200
+        return 'Please provide correct username\n', 400
 
 
 @app.route('/file', methods=['POST'])
 def file():
-    wav_file = request.files['file']
-    user_uuid = request.form['uuid']
-    user_token = request.form['token']
-    if user_token == db.session.execute(db.select(User.token).filter_by(token=user_token)).scalar() and user_uuid == db.session.execute(db.select(User.uuid).filter_by(uuid=user_uuid)).scalar():
-        file_uuid = uuid4().__str__()
-        audio_file = AudioFile(wav_file.filename, wav_file.read(), file_uuid, user_uuid)
-        db.session.add(audio_file)
-        db.session.flush()
-        db.session.commit()
-        return f'Please save the download link for your file - ' \
-               f'http://localhost:5000/record?id={file_uuid}&user={user_uuid}', 200
-    else:
-        return 'User not found', 404
-    # audio_file = AudioFile(wav_file.filename, wav_file.read(), 'as111dawqddd', 'asdasasd23123dqwqdcqs')
-    # db.session.add(audio_file)
-    # db.session.commit()
-    # a = db.session.execute(db.select(AudioFile.file).filter_by(token='as111dawqddd')).scalar()
-    # with open('temp_file.wav', 'wb') as f:
-    #     f.write(a)
-    # new_file = AudioSegment.from_file('temp_file.wav', format='wav')
-    # new_file.export('/Users/antonstrokov/PycharmProjects/bewise_audio_task/kek.mp3', format='mp3')
-
-
-
-    # print(*db.session.execute(db.select(AudioFile.file).filter_by(token='asdawqdd')))
-
-    # print(audio)
-    return 'ok'
+    try:
+        wav_file = request.files['file']
+        user_uuid = request.form['uuid']
+        user_token = request.form['token']
+        if User.get_user(uuid=user_uuid, token=user_token):
+            filename = secure_filename(wav_file.filename)
+            file_ext = os.path.splitext(filename)[1]
+            if filename != '' and file_ext in app.config['ALLOWED_EXTENSIONS']:
+                audio_file = AudioFile(filename, wav_file.read(), user_uuid)
+                db.session.add(audio_file)
+                db.session.flush()
+                db.session.commit()
+                return f'Please save the download link for your file - ' \
+                       f'http://localhost:5000/record?id={audio_file.file_uuid}&user={audio_file.user_uuid}\n', 200
+            else:
+                return 'Please submit correct file\n', 400
+        else:
+            return 'User not found\n', 404
+    except KeyError:
+        return 'Please provide correct data: /path/to/file, user uuid, token\n', 400
 
 
 @app.route('/record', methods=['GET'])
 def record():
-    file_uuid = request.args['id']
-    user_uuid = request.args['user']
-    return ''
+    try:
+        path = f'{current_app.root_path}/{app.config["UPLOAD_FOLDER"]}/'
+        file_uuid = request.args['id']
+        user_uuid = request.args['user']
+        wav_file: AudioFile = AudioFile.get_file(file_uuid, user_uuid)
+        if wav_file:
+            filename = os.path.splitext(wav_file.filename)[0] + '.mp3'
+            tmp_file = f'{path}/tmp.wav'
+            with open(tmp_file, 'wb') as f:
+                f.write(wav_file.file)
+            mp3_file = AudioSegment.from_file(tmp_file, format='wav')
+            mp3_file.export(f'{path}/{filename}', format='mp3')
+            return_data = io.BytesIO()
+            with open(f'{path}/{filename}', 'rb') as fo:
+                return_data.write(fo.read())
+            # (after writing, cursor will be at last byte, so move it to start)
+            return_data.seek(0)
+            os.remove(f'{path}/{filename}')
+            os.remove(tmp_file)
+            return send_file(return_data, mimetype='audio/mpeg', download_name=filename, as_attachment=True)
+        else:
+            return 'Please provide correct file unique identifier and access token\n', 400
+    except KeyError:
+        return 'Please provide correct link\n', 400
+
+
