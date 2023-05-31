@@ -5,13 +5,12 @@
 curl -iX POST -F username="strokman" http://127.0.0.1:5000/register
 
 
-curl -i -X POST -F file=@/Users/antonstrokov/PycharmProjects/bewise_audio_task/WAV_samples/file_example_WAV_1MG.wav -F uuid='stre-AhEq' -F token='875d0cc3-04bd-4318-92b1-5d9aae8bea9a' "http://localhost:5100/file"
+curl -i -X POST -F file=@/Users/antonstrokov/PycharmProjects/bewise_audio_task/WAV_samples/file_example_WAV_1MG.wav -F uuid='strokman-SrApVkAn' -F token='b2f2b3cb-4927-4c12-b9be-665e42a987ee' "http://strokman.synology.me:5100/file"
 
-Please save the download link for your file - http://localhost:5000/record?id=d8c2b615-125e-468b-997e-6680c4ec1e1b&user=strokman-7P6Y3s5v
 
-http://localhost:5000/record?id=ef2223d8-ea1b-48ff-b0cf-aea6775d9048&user=strokman-VlKnVuGb
+Please save the download link for your file - http://strokman.synology.me:5100/record?id=b0df28f6-db4c-44cc-ad43-64ab2898e4b5&user=1
 
-http://localhost:5000/record?user=dsaqr2r&id=wqrfq31
+
 curl 'http://localhost:5100/record?id=6b01ec35-637d-4dbd-88cd-9920c3b7992e&user=strokman-OiUkHqSy' --output kekek.mp3
 
 

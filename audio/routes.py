@@ -1,12 +1,9 @@
 import io
-import os
-import subprocess
 
 from audio import app, db
 from .models import User, AudioFile, FileProcessor
-from flask import request, send_file, current_app
+from flask import request, send_file
 from sqlalchemy.exc import IntegrityError
-from werkzeug.utils import secure_filename
 
 
 @app.route('/register', methods=['POST'])
@@ -52,23 +49,13 @@ def file():
 def record():
     err_msg = 'Please provide correct file unique identifier and user id\n'
     try:
-        # path = f'{current_app.root_path}/{app.config["UPLOAD_FOLDER"]}/'
         file_uuid = request.args['id']
         user_id = request.args['user']
         wav_file: AudioFile = AudioFile.get_file(file_uuid, user_id)
         if wav_file:
-            # filename = os.path.splitext(wav_file.filename)[0] + '.mp3'
-            # tmp_file = f'{path}tmp.wav'
-            # with open(tmp_file, 'wb') as f:
-            #     f.write(wav_file.file)
-            # cmd = f'lame --preset insane {tmp_file} {path}{filename}'
-            # subprocess.call(cmd, shell=True)
             return_data = io.BytesIO()
-            # with open(f'{path}{filename}', 'rb') as fo:
             return_data.write(wav_file.file)
             return_data.seek(0)
-            # os.remove(f'{path}{filename}')
-            # os.remove(tmp_file)
             return send_file(return_data, mimetype='audio/mpeg', download_name=wav_file.filename, as_attachment=True)
         else:
             return err_msg, 400

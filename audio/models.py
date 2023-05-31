@@ -1,10 +1,10 @@
-from audio import db, app
-from random import randint
-from uuid import uuid4
-
 import os
 import subprocess
+
+from audio import db, app
 from flask import current_app
+from random import randint
+from uuid import uuid4
 from werkzeug.utils import secure_filename
 
 
@@ -72,7 +72,6 @@ class FileProcessor:
 
     @filename.setter
     def filename(self, value):
-        # path = f'{current_app.root_path}/{app.config["UPLOAD_FOLDER"]}/'
         filename = secure_filename(value)
         file_ext: str = os.path.splitext(filename)[1]
         if filename != '' and file_ext.lower() in app.config['ALLOWED_EXTENSIONS']:
