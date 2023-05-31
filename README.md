@@ -5,7 +5,7 @@
 curl -iX POST -F username="strokman" http://127.0.0.1:5000/register
 
 
-curl -i -X POST -F file=@/Users/antonstrokov/PycharmProjects/bewise_audio_task/WAV_samples/file_example_WAV_1MG.wav -F uuid='strokman-SrApVkAn' -F token='b2f2b3cb-4927-4c12-b9be-665e42a987ee' "http://strokman.synology.me:5100/file"
+curl -i -X POST -F file=@/Users/antonstrokov/PycharmProjects/bewise_audio_task/FILE_SAMPLES/file_example_WAV_1MG.wav -F uuid='strokman-SrApVkAn' -F token='b2f2b3cb-4927-4c12-b9be-665e42a987ee' "http://strokman.synology.me:5100/file"
 
 
 Please save the download link for your file - http://strokman.synology.me:5100/record?id=b0df28f6-db4c-44cc-ad43-64ab2898e4b5&user=1
