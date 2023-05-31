@@ -8,4 +8,4 @@ if __name__ == '__main__':
 else:
     with app.app_context():
         db.create_all()
-        app.app_context().push()
+    app.app_context().push()

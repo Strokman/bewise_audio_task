@@ -13,10 +13,8 @@ from werkzeug.utils import secure_filename
 @app.route('/register', methods=['POST'])
 def register():
     username: str = request.form['username']
-    print(username)
     if username != '':
         try:
-            print(username)
             user = User(username)
             db.session.add(user)
             db.session.commit()
@@ -35,8 +33,6 @@ def file():
         user_uuid = request.form['uuid']
         user_token = request.form['token']
         user = User.get_user(uuid=user_uuid, token=user_token)
-        print(user)
-        print(user.username)
         if user:
             filename = secure_filename(wav_file.filename)
             file_ext: str = os.path.splitext(filename)[1]
@@ -62,7 +58,6 @@ def record():
         file_uuid = request.args['id']
         user_id = request.args['user']
         wav_file: AudioFile = AudioFile.get_file(file_uuid, user_id)
-        print(wav_file.owner.username)
         if wav_file:
             filename = os.path.splitext(wav_file.filename)[0] + '.mp3'
             tmp_file = f'{path}tmp.wav'

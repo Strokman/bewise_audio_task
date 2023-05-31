@@ -29,9 +29,9 @@ class User(db.Model):
     @classmethod
     def get_user(cls, username=None, uuid=None, token=None):
         if username:
-            return cls.query.filter_by(username=username).first()
+            return db.session.execute(db.select(cls).filter_by(username=username)).scalar()
         elif uuid and token:
-            return cls.query.filter_by(uuid=uuid, token=token).first()
+            return db.session.execute(db.select(cls).filter_by(uuid=uuid, token=token)).scalar()
         else:
             return False
 
