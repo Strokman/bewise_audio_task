@@ -5,7 +5,7 @@
 curl -iX POST -F username="strokman" http://127.0.0.1:5000/register
 
 
-curl -i -X POST -F file=@file_example_WAV_1MG.wav -F uuid='strokman-NrJgYpFb' -F token='0be2bf6c-ac01-4570-9312-419f86159d0a' "http://localhost:5100/file"
+curl -i -X POST -F file=@file_example_WAV_1MG.wav -F uuid='strokman-DdJgYzLd' -F token='45ee59cd-80f4-4560-969d-e1682419676c' "http://localhost:5100/file"
 
 Please save the download link for your file - http://localhost:5000/record?id=d8c2b615-125e-468b-997e-6680c4ec1e1b&user=strokman-7P6Y3s5v
 
