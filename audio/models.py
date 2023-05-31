@@ -10,7 +10,7 @@ class User(db.Model):
     username: str = db.Column(db.String(50), nullable=False, unique=True)
     uuid: str = db.Column(db.String(100), nullable=False, unique=True)
     token: str = db.Column(db.String(36), nullable=False, unique=True)
-    files = db.relationship('AudioFile', backref='users', lazy=True)
+    audiofiles = db.relationship('AudioFile', backref='owner', lazy=True)
 
     def __init__(self, username: str) -> None:
         self.username = username
@@ -43,14 +43,14 @@ class AudioFile(db.Model):
     filename: str = db.Column(db.String(100), nullable=False)
     file = db.Column(db.LargeBinary, nullable=False)
     file_uuid: str = db.Column(db.String(36), nullable=False, unique=True)
-    user_uuid: int = db.Column(db.String(100), db.ForeignKey('users.uuid'), nullable=False)
+    user_id: str = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=False)
 
-    def __init__(self, filename, file, user_uuid):
+    def __init__(self, filename, file, owner: User):
         self.filename = filename
         self.file = file
         self.file_uuid = uuid4().__str__()
-        self.user_uuid = user_uuid
+        self.user_id = owner.id
 
     @classmethod
-    def get_file(cls, file_uuid, user_uuid):
-        return db.session.execute(db.select(cls).filter_by(file_uuid=file_uuid, user_uuid=user_uuid)).scalar()
+    def get_file(cls, file_uuid, user_id):
+        return db.session.execute(db.select(cls).filter_by(file_uuid=file_uuid, user_id=user_id)).scalar()

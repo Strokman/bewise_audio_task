@@ -7,6 +7,9 @@ from os import getenv
 app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://strokman:gPdybKpr04020051@strokman.synology.me:55432/gis_shishlina"
 app.config['SQLALCHEMY_DATABASE_URI'] = getenv('SQLALCHEMY_DATABASE_URI')
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test_task.db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://test:test@localhost:5555/test'
+
 app.config['UPLOAD_FOLDER'] = 'static'
 app.config['ALLOWED_EXTENSIONS'] = ['.wav']
 db = SQLAlchemy()

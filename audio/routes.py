@@ -17,7 +17,6 @@ def register():
         try:
             user = User(username)
             db.session.add(user)
-            db.session.flush()
             db.session.commit()
             return f'Please save your register information: {user.uuid=}, {user.token=}\n', 200
         except IntegrityError:
@@ -32,16 +31,16 @@ def file():
         wav_file = request.files['file']
         user_uuid = request.form['uuid']
         user_token = request.form['token']
-        if User.get_user(uuid=user_uuid, token=user_token):
+        user = User.get_user(uuid=user_uuid, token=user_token)
+        if user:
             filename = secure_filename(wav_file.filename)
             file_ext: str = os.path.splitext(filename)[1]
             if filename != '' and file_ext.lower() in app.config['ALLOWED_EXTENSIONS']:
-                audio_file = AudioFile(filename, wav_file.read(), user_uuid)
+                audio_file = AudioFile(filename, wav_file.read(), user)
                 db.session.add(audio_file)
-                db.session.flush()
                 db.session.commit()
                 return f'Please save the download link for your file - ' \
-                       f'{flask.request.host_url}record?id={audio_file.file_uuid}&user={audio_file.user_uuid}\n', 200
+                       f'{flask.request.host_url}record?id={audio_file.file_uuid}&user={audio_file.user_id}\n', 200
             else:
                 return 'Please submit correct file\n', 400
         else:
@@ -56,8 +55,9 @@ def record():
     try:
         path = f'{current_app.root_path}/{app.config["UPLOAD_FOLDER"]}/'
         file_uuid = request.args['id']
-        user_uuid = request.args['user']
-        wav_file: AudioFile = AudioFile.get_file(file_uuid, user_uuid)
+        user_id = request.args['user']
+        wav_file: AudioFile = AudioFile.get_file(file_uuid, user_id)
+        print(wav_file.owner.username)
         if wav_file:
             filename = os.path.splitext(wav_file.filename)[0] + '.mp3'
             tmp_file = f'{path}tmp.wav'
