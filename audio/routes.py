@@ -13,8 +13,10 @@ from werkzeug.utils import secure_filename
 @app.route('/register', methods=['POST'])
 def register():
     username: str = request.form['username']
+    print(username)
     if username != '':
         try:
+            print(username)
             user = User(username)
             db.session.add(user)
             db.session.commit()
