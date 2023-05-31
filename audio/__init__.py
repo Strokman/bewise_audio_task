@@ -11,7 +11,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = getenv('SQLALCHEMY_DATABASE_URI')
 
 app.config['UPLOAD_FOLDER'] = 'static'
 app.config['ALLOWED_EXTENSIONS'] = ['.wav']
-db = SQLAlchemy()
-db.init_app(app)
+db = SQLAlchemy(app)
+# db.init_app(app)
 
 from audio import routes
