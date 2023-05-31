@@ -15,14 +15,15 @@ def register():
     username: str = request.form['username']
     print(username)
     if username != '':
-        # try:
-        print(username)
-        user = User(username)
-        db.session.add(user)
-        db.session.commit()
-        return f'Please save your register information: {user.uuid=}, {user.token=}\n', 200
-        # except IntegrityError:
-        #     return 'User exists\n', 409
+        try:
+            print(username)
+            user = User(username)
+            db.session.add(user)
+            db.session.commit()
+            return f'Please save your register information: {user.uuid=}, {user.token=}\n', 200
+        except IntegrityError:
+            db.session.close()
+            return 'User exists\n', 409
     else:
         return 'Please provide correct username\n', 400
 
