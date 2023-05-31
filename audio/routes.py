@@ -47,7 +47,7 @@ def file():
 
 @app.route('/record', methods=['GET'])
 def record():
-    err_msg = 'Please provide correct file unique identifier and user id\n'
+    err_msg = 'Please provide correct file_uuid and user_id\n'
     try:
         file_uuid = request.args['id']
         user_id = request.args['user']

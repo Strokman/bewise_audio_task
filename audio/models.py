@@ -92,7 +92,6 @@ class FileProcessor:
             f.write(raw_file)
         cmd = f'lame --preset insane {tmp_file} {path}{self.filename}'
         subprocess.call(cmd, shell=True)
-        tmp = b''
         with open(f'{path}{self.filename}', 'rb') as f:
             self._file = f.read()
         os.remove(f'{path}{self.filename}')
