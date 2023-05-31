@@ -4,7 +4,7 @@ from uuid import uuid4
 
 
 class User(db.Model):
-    __tablename__ = 'users'
+    __tablename__ = 'userss'
 
     id: int = db.Column(db.Integer(), nullable=False, primary_key=True)
     username: str = db.Column(db.String(50), nullable=False, unique=True)
@@ -29,9 +29,9 @@ class User(db.Model):
     @classmethod
     def get_user(cls, username=None, uuid=None, token=None):
         if username:
-            return db.session.execute(db.select(cls).filter_by(username=username)).scalar()
+            return cls.query.filter_by(username=username).first()
         elif uuid and token:
-            return db.session.execute(db.select(cls).filter_by(uuid=uuid, token=token)).scalar()
+            return cls.query.filter_by(uuid=uuid, token=token).first()
         else:
             return False
 
@@ -43,7 +43,7 @@ class AudioFile(db.Model):
     filename: str = db.Column(db.String(100), nullable=False)
     file = db.Column(db.LargeBinary, nullable=False)
     file_uuid: str = db.Column(db.String(36), nullable=False, unique=True)
-    user_id: int = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=False)
+    user_id: int = db.Column(db.Integer(), db.ForeignKey('userss.id'), nullable=False)
 
     def __init__(self, filename, file, owner: User):
         self.filename = filename

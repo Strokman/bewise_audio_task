@@ -18,7 +18,6 @@ def register():
             user = User(username)
             db.session.add(user)
             db.session.commit()
-            db.session.close()
             return f'Please save your register information: {user.uuid=}, {user.token=}\n', 200
         except IntegrityError:
             return 'User exists\n', 409
@@ -33,6 +32,8 @@ def file():
         user_uuid = request.form['uuid']
         user_token = request.form['token']
         user = User.get_user(uuid=user_uuid, token=user_token)
+        print(user)
+        print(user.username)
         if user:
             filename = secure_filename(wav_file.filename)
             file_ext: str = os.path.splitext(filename)[1]
@@ -40,7 +41,6 @@ def file():
                 audio_file = AudioFile(filename, wav_file.read(), user)
                 db.session.add(audio_file)
                 db.session.commit()
-                db.session.close()
                 return f'Please save the download link for your file - ' \
                        f'{flask.request.host_url}record?id={audio_file.file_uuid}&user={audio_file.user_id}\n', 200
             else:
