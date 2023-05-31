@@ -1,6 +1,11 @@
-from audio import db
+from audio import db, app
 from random import randint
 from uuid import uuid4
+
+import os
+import subprocess
+from flask import current_app
+from werkzeug.utils import secure_filename
 
 
 class User(db.Model):
@@ -54,3 +59,42 @@ class AudioFile(db.Model):
     @classmethod
     def get_file(cls, file_uuid, user_id):
         return db.session.execute(db.select(cls).filter_by(file_uuid=file_uuid, user_id=user_id)).scalar()
+
+
+class FileProcessor:
+    def __init__(self, filename, file: bytes):
+        self.filename = filename
+        self.file = file
+
+    @property
+    def filename(self):
+        return self._filename
+
+    @filename.setter
+    def filename(self, value):
+        # path = f'{current_app.root_path}/{app.config["UPLOAD_FOLDER"]}/'
+        filename = secure_filename(value)
+        file_ext: str = os.path.splitext(filename)[1]
+        if filename != '' and file_ext.lower() in app.config['ALLOWED_EXTENSIONS']:
+            mp3_filename = f'{os.path.splitext(filename)[0]}.mp3'
+            self._filename = mp3_filename
+        else:
+            raise ValueError('File format is not allowed')
+
+    @property
+    def file(self):
+        return self._file
+
+    @file.setter
+    def file(self, raw_file):
+        path = f'{current_app.root_path}/{app.config["UPLOAD_FOLDER"]}/'
+        tmp_file = f'{path}tmp.wav'
+        with open(tmp_file, 'wb') as f:
+            f.write(raw_file)
+        cmd = f'lame --preset insane {tmp_file} {path}{self.filename}'
+        subprocess.call(cmd, shell=True)
+        tmp = b''
+        with open(f'{path}{self.filename}', 'rb') as f:
+            self._file = f.read()
+        os.remove(f'{path}{self.filename}')
+        os.remove(tmp_file)
