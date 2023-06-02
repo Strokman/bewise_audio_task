@@ -9,17 +9,27 @@ from sqlalchemy.exc import IntegrityError
 @app.route('/register', methods=['POST'])
 def register():
     username: str = request.form['username']
-    if username != '':
-        try:
+    if username == '':
+        return 'Please provide correct username\n', 400
+    else:
+        user_check = User.get_user(username)
+        if user_check:
+            return f'User {user_check} exists\n', 409
+        else:
             user = User(username)
             db.session.add(user)
             db.session.commit()
+
+            # try:
+            #     user = User.get_user(username)
+            #     db.session.add(user)
+            #     db.session.commit()
             return f'Please save your register information: {user.uuid=}, {user.token=}\n', 200
-        except IntegrityError:
-            db.session.close()
-            return 'User exists\n', 409
-    else:
-        return 'Please provide correct username\n', 400
+            # except IntegrityError:
+            #     db.session.close()
+
+        # else:
+
 
 
 @app.route('/file', methods=['POST'])

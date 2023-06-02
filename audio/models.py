@@ -1,6 +1,7 @@
 import os
 import subprocess
 
+import audio.models
 from audio import db, app
 from flask import current_app
 from random import randint
@@ -9,6 +10,11 @@ from werkzeug.utils import secure_filename
 
 
 class User(db.Model):
+    """
+    Класс наследуется от модели SQLAlchemy и содержит поля,
+    которые затем будут транслироваться в базу данных,
+    в таблицу __tablename__
+    """
     __tablename__ = 'users'
 
     id: int = db.Column(db.Integer(), nullable=False, primary_key=True)
@@ -19,11 +25,17 @@ class User(db.Model):
 
     def __init__(self, username: str) -> None:
         self.username = username
-        self.uuid = self.create_uuid()
-        self.token = uuid4().__str__()
+        self.uuid: str = self.__create_uuid()
+        self.token: str = uuid4().__str__()
 
-    def create_uuid(self) -> str:
-        uuid = ''
+    def __create_uuid(self) -> str:
+        """
+        Метод создает уникальный идентификатор пользователя.
+        Для этого он конкатенирует имя пользователя и строку,
+        сформированную из случайных букв латинского алфавита
+        :return: str
+        """
+        uuid: str = ''
         for i in range(len(self.username)):
             if i % 2 == 0:
                 uuid += chr(randint(65, 90))
@@ -32,7 +44,15 @@ class User(db.Model):
         return self.username + '-' + uuid
 
     @classmethod
-    def get_user(cls, username=None, uuid=None, token=None):
+    def get_user(cls, username: str = None, uuid: str = None, token: str = None) -> audio.models.User | bool:
+        """
+        Метод совершает запрос к базе данных в соответствии с переданными аргументами:
+        либо по имени пользователя, либо по токену и идентификатору
+        :param username:
+        :param uuid:
+        :param token:
+        :return:
+        """
         if username:
             return db.session.execute(db.select(cls).filter_by(username=username)).scalar()
         elif uuid and token:
@@ -42,22 +62,28 @@ class User(db.Model):
 
 
 class AudioFile(db.Model):
+    """
+    Класс наследуется от модели SQLAlchemy и содержит поля,
+    которые затем будут транслироваться в базу данных,
+    в таблицу __tablename__
+    """
     __tablename__ = 'audio_files'
 
     id: int = db.Column(db.Integer(), nullable=False, primary_key=True)
     filename: str = db.Column(db.String(100), nullable=False)
-    file = db.Column(db.LargeBinary, nullable=False)
+    file: bytes = db.Column(db.LargeBinary, nullable=False)
     file_uuid: str = db.Column(db.String(36), nullable=False, unique=True)
     user_id: int = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=False)
 
-    def __init__(self, filename, file, owner: User):
-        self.filename = filename
-        self.file = file
-        self.file_uuid = uuid4().__str__()
-        self.user_id = owner.id
+    def __init__(self, filename: str, file: bytes, owner: User) -> None:
+        self.filename: str = filename
+        self.file: bytes = file
+        self.file_uuid: str = uuid4().__str__()
+        self.user_id: int = owner.id
 
     @classmethod
-    def get_file(cls, file_uuid, user_id):
+    def get_file(cls, file_uuid, user_id) -> audio.models.AudioFile | None:
+        ""
         return db.session.execute(db.select(cls).filter_by(file_uuid=file_uuid, user_id=user_id)).scalar()
 
 

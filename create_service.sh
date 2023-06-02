@@ -4,7 +4,7 @@ DIR="postgres-data"
 if [ -d "$DIR" ]; then
   echo "${DIR} exists"
 else
- mkdir postgres-data && mkdir audio/static
+ mkdir postgres-data
 fi
 
 docker-compose up --build
