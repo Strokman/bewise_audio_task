@@ -1,7 +1,6 @@
 import os
 import subprocess
 
-import audio.models
 from audio import db, app
 from flask import current_app
 from random import randint
@@ -44,7 +43,7 @@ class User(db.Model):
         return self.username + '-' + uuid
 
     @classmethod
-    def get_user(cls, username: str = None, uuid: str = None, token: str = None) -> audio.models.User | bool:
+    def get_user(cls, username: str = None, uuid: str = None, token: str = None):
         """
         Метод совершает запрос к базе данных в соответствии с переданными аргументами:
         либо по имени пользователя, либо по токену и идентификатору
@@ -82,22 +81,21 @@ class AudioFile(db.Model):
         self.user_id: int = owner.id
 
     @classmethod
-    def get_file(cls, file_uuid, user_id) -> audio.models.AudioFile | None:
-        ""
+    def get_file(cls, file_uuid, user_id):
         return db.session.execute(db.select(cls).filter_by(file_uuid=file_uuid, user_id=user_id)).scalar()
 
 
 class FileProcessor:
-    def __init__(self, filename, file: bytes):
+    def __init__(self, filename, file: bytes) -> None:
         self.filename = filename
         self.file = file
 
     @property
-    def filename(self):
+    def filename(self) -> None:
         return self._filename
 
     @filename.setter
-    def filename(self, value):
+    def filename(self, value: str) -> None | Exception:
         filename = secure_filename(value)
         file_ext: str = os.path.splitext(filename)[1]
         if filename != '' and file_ext.lower() in app.config['ALLOWED_EXTENSIONS']:
@@ -107,11 +105,11 @@ class FileProcessor:
             raise ValueError('File format is not allowed')
 
     @property
-    def file(self):
+    def file(self) -> None:
         return self._file
 
     @file.setter
-    def file(self, raw_file):
+    def file(self, raw_file) -> None:
         path = f'{current_app.root_path}/{app.config["UPLOAD_FOLDER"]}/'
         tmp_file = f'{path}tmp.wav'
         with open(tmp_file, 'wb') as f:

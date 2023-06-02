@@ -19,12 +19,12 @@ def register():
             user = User(username)
             db.session.add(user)
             db.session.commit()
-
+            return f'Please save your register information: {user.uuid=}, {user.token=}\n', 200
             # try:
             #     user = User.get_user(username)
             #     db.session.add(user)
             #     db.session.commit()
-            return f'Please save your register information: {user.uuid=}, {user.token=}\n', 200
+
             # except IntegrityError:
             #     db.session.close()
 
