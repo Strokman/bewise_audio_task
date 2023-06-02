@@ -1,5 +1,5 @@
-import os
-import subprocess
+from os import path, remove
+from subprocess import call
 
 from audio import db, app
 from flask import current_app
@@ -12,7 +12,7 @@ class User(db.Model):
     """
     Класс наследуется от модели SQLAlchemy и содержит поля,
     которые затем будут транслироваться в базу данных,
-    в таблицу __tablename__
+    в таблицу хранения данных пользователей
     """
     __tablename__ = 'users'
 
@@ -64,7 +64,7 @@ class AudioFile(db.Model):
     """
     Класс наследуется от модели SQLAlchemy и содержит поля,
     которые затем будут транслироваться в базу данных,
-    в таблицу __tablename__
+    в таблицу, где будут хранится файлы
     """
     __tablename__ = 'audio_files'
 
@@ -82,41 +82,54 @@ class AudioFile(db.Model):
 
     @classmethod
     def get_file(cls, file_uuid, user_id):
+        """
+        Метод делает запрос к базе данных по идентификатору файла
+        и id пользователя, возвращает экземпляр класса с необходимым файлом,
+        либо None
+        :param file_uuid:
+        :param user_id:
+        :return:
+        """
         return db.session.execute(db.select(cls).filter_by(file_uuid=file_uuid, user_id=user_id)).scalar()
 
 
 class FileProcessor:
+    """
+    Класс обрабатывает входящие файлы. Проверяет название файла на допустимость (.wav),
+    сохраняет в файловой системе в папке static, конвертирует утилитой lame
+    в mp3, сохраняет данные в атрибуты класса
+    """
     def __init__(self, filename, file: bytes) -> None:
         self.filename = filename
         self.file = file
 
     @property
-    def filename(self) -> None:
+    def filename(self) -> str:
         return self._filename
 
     @filename.setter
-    def filename(self, value: str) -> None | Exception:
+    def filename(self, value: str):
         filename = secure_filename(value)
-        file_ext: str = os.path.splitext(filename)[1]
+        file_ext: str = path.splitext(filename)[1]
         if filename != '' and file_ext.lower() in app.config['ALLOWED_EXTENSIONS']:
-            mp3_filename = f'{os.path.splitext(filename)[0]}.mp3'
+            mp3_filename = f'{path.splitext(filename)[0]}.mp3'
             self._filename = mp3_filename
         else:
             raise ValueError('File format is not allowed')
 
     @property
-    def file(self) -> None:
+    def file(self) -> bytes:
         return self._file
 
     @file.setter
-    def file(self, raw_file) -> None:
-        path = f'{current_app.root_path}/{app.config["UPLOAD_FOLDER"]}/'
-        tmp_file = f'{path}tmp.wav'
+    def file(self, raw_file: bytes) -> None:
+        path_to_static: str = f'{current_app.root_path}/{app.config["UPLOAD_FOLDER"]}/'
+        tmp_file: str = f'{path_to_static}tmp.wav'
         with open(tmp_file, 'wb') as f:
             f.write(raw_file)
-        cmd = f'lame --preset insane {tmp_file} {path}{self.filename}'
-        subprocess.call(cmd, shell=True)
-        with open(f'{path}{self.filename}', 'rb') as f:
+        cmd: str = f'lame --preset insane {tmp_file} {path_to_static}{self.filename}'
+        call(cmd, shell=True)
+        with open(f'{path_to_static}{self.filename}', 'rb') as f:
             self._file = f.read()
-        os.remove(f'{path}{self.filename}')
-        os.remove(tmp_file)
+        remove(f'{path_to_static}{self.filename}')
+        remove(tmp_file)
