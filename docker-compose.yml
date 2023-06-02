@@ -10,7 +10,7 @@ services:
     networks:
       - default
     ports:
-      - 5555:5432
+      - 5600:5432
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "test" ]
       interval: 10s

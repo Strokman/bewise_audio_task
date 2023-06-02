@@ -51,12 +51,14 @@ def record():
     try:
         file_uuid = request.args['id']
         user_id = request.args['user']
-        wav_file: AudioFile = AudioFile.get_file(file_uuid, user_id)
-        if wav_file:
+        mp3_file: AudioFile = AudioFile.get_file(file_uuid, user_id)
+        if mp3_file:
             return_data = io.BytesIO()
-            return_data.write(wav_file.file)
+            return_data.write(mp3_file.file)
             return_data.seek(0)
-            return send_file(return_data, mimetype='audio/mpeg', download_name=wav_file.filename, as_attachment=True)
+            return send_file(return_data, mimetype='audio/mpeg',
+                             download_name=f'{mp3_file.owner.uuid}-{mp3_file.file_uuid}',
+                             as_attachment=True)
         else:
             return err_msg, 400
     except KeyError:
