@@ -76,7 +76,7 @@ curl -i -X POST -F file=@/path/to/file -F uuid=<user.uuid> -F token=<user.token>
 генерирует `uuid` для файла, сохраняет в базу данных и отдает ссылку для скачивания файл,
 которая содержит `uuid` файла и `id` пользователя:
 
-> Please save the download link for your file - http://localhost:5100/record?id=<file_uuid>&user=<id>
+> Please save the download link for your file - (http://localhost:5100/record?id=<file_uuid>&user=<id>)
 
 Получить файл можно просто перейдя по ссылке (см. выше), тогда файл будет скачан автоматически через браузер,
 либо также обратиться по ссылке утилитой `curl`
