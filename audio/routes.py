@@ -3,7 +3,6 @@ import io
 from audio import app, db
 from .models import User, AudioFile, FileProcessor
 from flask import request, send_file
-from sqlalchemy.exc import IntegrityError
 
 
 @app.route('/register', methods=['POST'])
@@ -12,24 +11,14 @@ def register():
     if username == '':
         return 'Please provide correct username\n', 400
     else:
-        user_check = User.get_user(username)
+        user_check: User = User.get_user(username)
         if user_check:
-            return f'User {user_check} exists\n', 409
+            return f'User {user_check.username} exists\n', 409
         else:
             user = User(username)
             db.session.add(user)
             db.session.commit()
             return f'Please save your register information: {user.uuid=}, {user.token=}\n', 200
-            # try:
-            #     user = User.get_user(username)
-            #     db.session.add(user)
-            #     db.session.commit()
-
-            # except IntegrityError:
-            #     db.session.close()
-
-        # else:
-
 
 
 @app.route('/file', methods=['POST'])
