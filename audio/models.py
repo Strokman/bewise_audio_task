@@ -23,7 +23,7 @@ class User(db.Model):
     audiofiles = db.relationship('AudioFile', backref='owner', lazy=True)
 
     def __init__(self, username: str) -> None:
-        self.username = username
+        self.username: str = username
         self.uuid: str = self.__create_uuid()
         self.token: str = uuid4().__str__()
 
@@ -53,11 +53,17 @@ class User(db.Model):
         :return:
         """
         if username:
-            return db.session.execute(db.select(cls).filter_by(username=username)).scalar()
+            return db.session.query(cls).filter_by(username=username).first()
         elif uuid and token:
-            return db.session.execute(db.select(cls).filter_by(uuid=uuid, token=token)).scalar()
+            return db.session.query(cls).filter_by(uuid=uuid, token=token).first()
         else:
             return False
+
+    def as_dict(self) -> dict:
+        d = dict()
+        d["uuid"]: str = self.uuid
+        d["token"]: str = self.token
+        return d
 
 
 class AudioFile(db.Model):
@@ -90,7 +96,7 @@ class AudioFile(db.Model):
         :param user_id:
         :return:
         """
-        return db.session.execute(db.select(cls).filter_by(file_uuid=file_uuid, user_id=user_id)).scalar()
+        return db.session.query(cls).filter_by(file_uuid=file_uuid, user_id=user_id).first()
 
 
 class FileProcessor:
@@ -99,16 +105,16 @@ class FileProcessor:
     сохраняет в файловой системе в папке static, конвертирует утилитой lame
     в mp3, сохраняет данные в атрибуты класса
     """
-    def __init__(self, filename, file: bytes) -> None:
-        self.filename = filename
-        self.file = file
+    def __init__(self, filename: str, file: bytes) -> None:
+        self.filename: str = filename
+        self.file: bytes = file
 
     @property
     def filename(self) -> str:
         return self._filename
 
     @filename.setter
-    def filename(self, value: str):
+    def filename(self, value: str) -> None:
         filename = secure_filename(value)
         file_ext: str = path.splitext(filename)[1]
         if filename != '' and file_ext.lower() in app.config['ALLOWED_EXTENSIONS']:
@@ -133,3 +139,18 @@ class FileProcessor:
             self._file = f.read()
         remove(f'{path_to_static}{self.filename}')
         remove(tmp_file)
+
+
+class InvalidAPIUsage(Exception):
+    status_code: int = 400
+
+    def __init__(self, message: str, status_code=None) -> None:
+        super().__init__()
+        self.message: str = message
+        if status_code:
+            self.status_code: int = status_code
+
+    def to_dict(self) -> dict:
+        error_response = dict()
+        error_response['error']: str = self.message
+        return error_response

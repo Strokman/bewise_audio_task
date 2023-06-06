@@ -54,7 +54,7 @@ chmod +x create_service.sh
 Методом POST в форме передается имя пользователя:
 
 ```
-curl -iX POST -F username=<username> http://localhost:5100/register
+curl -iX POST -F username=<username> http://localhost:5100/api/register
 ```
 
 После этого сервис сгенерирует ответ, в котором пользователю будут сообщены его uuid и токен доступа:
@@ -65,7 +65,7 @@ curl -iX POST -F username=<username> http://localhost:5100/register
 (вставляем в формы путь к файлу, а также полученные в прошлом пункте регистрационные данные)
 
 ```
-curl -i -X POST -F file=@/path/to/file -F uuid=<user.uuid> -F token=<user.token> "http://localhost:5100/file"
+curl -i -X POST -F file=@/path/to/file -F uuid=<user.uuid> -F token=<user.token> "http://localhost:5100/api/file"
 ```
 
 Можно указать абсолютный путь или только имя файла, если он находится в текущей директории.
@@ -78,14 +78,14 @@ curl -i -X POST -F file=@/path/to/file -F uuid=<user.uuid> -F token=<user.token>
 которая содержит `uuid` файла и `id` пользователя:
 
 ```
-Please save the download link for your file - http://localhost:5100/record?id=<file_uuid>&user=<id>
+Please save the download link for your file - http://localhost:5100/api/record?id=<file_uuid>&user=<id>
 ```
 
 Получить файл можно просто перейдя по ссылке (см. выше), тогда файл будет скачан автоматически через браузер,
 либо также обратиться по ссылке утилитой `curl`
 
 ```
-curl 'http://localhost:5100/record?id=<file_uuid>&user=<id>' --output <filename>.mp3
+curl 'http://localhost:5100/api/record?id=<file_uuid>&user=<id>' --output <filename>.mp3
 ```
 
 Имя файла формируется из `uuid` пользователя и `uuid` файла для избежания конфликтов и дублирования имени файла.
