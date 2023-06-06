@@ -50,11 +50,12 @@ def file() -> tuple[Response, int]:
                 db.session.add(audio_file)
                 db.session.commit()
                 return jsonify(
-                    dict(link=f'{request.host_url}api/record?id={audio_file.file_uuid}&user={audio_file.user_id}')), 200
+                    dict(download_link=f'{request.host_url}api/record?id='
+                                       f'{audio_file.file_uuid}&user={audio_file.user_id}')), 200
             except ValueError as e:
                 raise InvalidAPIUsage(f'Please submit correct file - {e}', 415)
         else:
-            raise InvalidAPIUsage('User not found', 404)
+            raise InvalidAPIUsage('User not found - incorrect token or uuid', 404)
     except KeyError:
         raise InvalidAPIUsage('Please provide correct data: /path/to/file, user uuid, token', 400)
 
