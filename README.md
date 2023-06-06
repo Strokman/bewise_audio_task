@@ -57,15 +57,15 @@ chmod +x create_service.sh
 curl -iX POST -F username=<username> http://localhost:5100/api/register
 ```
 
-После этого сервис сгенерирует ответ, в котором пользователю будут сообщены его uuid и токен доступа:
+После этого сервис сгенерирует ответ в формате json, в котором пользователю будут сообщены его uuid и токен доступа:
 
-> Please save your register information: user.uuid=<user.uuid>, user.token=<user.token>
+> {"token":"<token>","uuid":"<uuid>"}
 
 Эту информацию нужно сохранить для загрузки файла, которая происходит при помощи выполнения следующего запроса
 (вставляем в формы путь к файлу, а также полученные в прошлом пункте регистрационные данные)
 
 ```
-curl -i -X POST -F file=@/path/to/file -F uuid=<user.uuid> -F token=<user.token> "http://localhost:5100/api/file"
+curl -i -X POST -F file=@/path/to/file -F uuid=<uuid> -F token=<token> "http://localhost:5100/api/file"
 ```
 
 Можно указать абсолютный путь или только имя файла, если он находится в текущей директории.

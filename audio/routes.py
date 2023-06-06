@@ -1,13 +1,13 @@
 from audio import app, db
 from io import BytesIO
 from .models import AudioFile, FileProcessor, InvalidAPIUsage, User
-from flask import jsonify, request, send_file, Response, url_for
+from flask import jsonify, request, send_file, Response
 from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import NotFound
 
 
 @app.route('/api/register', methods=['POST'])
-def register() -> tuple[str, int]:
+def register() -> tuple[dict, int]:
     """
     Принимает данные из формы в виде строки с именем пользователя.
     Проверяет, есть ли в базе такой пользователь, если да - возвращает ответ
@@ -30,7 +30,7 @@ def register() -> tuple[str, int]:
 
 
 @app.route('/api/file', methods=['POST'])
-def file() -> tuple[str, int]:
+def file() -> tuple[Response, int]:
     """
     В формах принимает файл, уникальный идентификатор пользователя и
     токен доступа. Проверяет, корректные ли данные были переданы в формах,
@@ -49,10 +49,10 @@ def file() -> tuple[str, int]:
                 audio_file: AudioFile = AudioFile(processed_file.filename, processed_file.file, user)
                 db.session.add(audio_file)
                 db.session.commit()
-                return f'Please save the download link for your file - ' \
-                       f'{request.host_url}api/record?id={audio_file.file_uuid}&user={audio_file.user_id}\n', 200
+                return jsonify(
+                    dict(link=f'{request.host_url}api/record?id={audio_file.file_uuid}&user={audio_file.user_id}')), 200
             except ValueError as e:
-                raise InvalidAPIUsage (f'Please submit correct file - {e}', 415)
+                raise InvalidAPIUsage(f'Please submit correct file - {e}', 415)
         else:
             raise InvalidAPIUsage('User not found', 404)
     except KeyError:
@@ -86,11 +86,11 @@ def record() -> Response | tuple[str, int]:
 
 
 @app.errorhandler(404)
-def resource_not_found(e: NotFound) -> tuple:
+def resource_not_found(e: NotFound) -> tuple[Response, int]:
     print(type(e))
     return jsonify(error=str(e), description='Please use correct route - http://host:port/api/<route>'), 404
 
 
 @app.errorhandler(InvalidAPIUsage)
-def resource_not_found(e: InvalidAPIUsage) -> tuple:
+def resource_not_found(e: InvalidAPIUsage) -> tuple[Response, int]:
     return jsonify(e.to_dict()), e.status_code
