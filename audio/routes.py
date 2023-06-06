@@ -94,4 +94,3 @@ def resource_not_found(e: NotFound) -> tuple:
 @app.errorhandler(InvalidAPIUsage)
 def resource_not_found(e: InvalidAPIUsage) -> tuple:
     return jsonify(e.to_dict()), e.status_code
-
