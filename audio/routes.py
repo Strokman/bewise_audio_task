@@ -55,7 +55,7 @@ def file() -> tuple[Response, int]:
             except ValueError as e:
                 raise InvalidAPIUsage(f'Please submit correct file - {e}', 415)
         else:
-            raise InvalidAPIUsage('User not found - incorrect token or uuid', 404)
+            raise InvalidAPIUsage('User not found - invalid token or uuid', 404)
     except KeyError:
         raise InvalidAPIUsage('Please provide correct data: /path/to/file, user uuid, token', 400)
 
